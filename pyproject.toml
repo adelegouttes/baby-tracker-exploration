@@ -8,8 +8,11 @@ authors = ["agouttes <adele.gouttes@zalando.de>"]
 python = "^3.7.1"
 pandas = "^1.0"
 click = "^7.1.2"
+pytest-cov = "^2.11.0"
 
 [tool.poetry.dev-dependencies]
+pytest = "^6.2.1"
+coverage = {extras = ["toml"], version = "^5.3.1"}
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -17,3 +20,14 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 explore = "baby_tracker_exploration.console:main"
+
+[tool.coverage.paths]
+source = ["baby_tracker_exploration"]
+
+[tool.coverage.run]
+branch = true
+source = ["baby_tracker_exploration"]
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 100
