@@ -1,0 +1,9 @@
+[flake8]
+select = BLK,C,E,F,I,W  # Checks allignment with Black standards
+ignore = E203,W503  # Built-in that don't allig well with Black
+max-line-length = 88
+max-complexity = 10
+
+# Information for flake8-import-order plug-in
+application-import-names = baby_tracker_exploration,tests
+import-order-style = google

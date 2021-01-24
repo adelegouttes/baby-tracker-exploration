@@ -1,7 +1,8 @@
-import pytest
 import click.testing
+import pytest
 
 from baby_tracker_exploration import console
+
 
 @pytest.fixture
 def runner():

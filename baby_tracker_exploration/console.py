@@ -5,8 +5,7 @@ import pandas as pd
 
 
 DATA_PATH = os.path.join(
-    os.path.abspath(os.path.dirname(__file__)),
-    "data/BabyRecords.csv"
+    os.path.abspath(os.path.dirname(__file__)), "data/BabyRecords.csv"
 )
 
 
