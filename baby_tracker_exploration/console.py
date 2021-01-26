@@ -9,7 +9,7 @@ DATA_PATH = os.path.join(
 )
 
 
-def get_data(data_path=DATA_PATH):
+def get_data(data_path: str = DATA_PATH) -> None:
     df = pd.read_csv(data_path)
     feeding_df = df.loc[df.RecordCategory == "Feeding"]
     print(feeding_df.head())

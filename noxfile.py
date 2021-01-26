@@ -2,7 +2,7 @@ import nox
 
 
 # Sessions that nox will run by default, if no session is specified
-nox.options.sessions = "lint", "tests"
+nox.options.sessions = "lint", "mypy", "tests"
 
 
 # Useful option:
@@ -33,3 +33,10 @@ def black(session):
     args = session.posargs or locations
     session.install("black")
     session.run("black", *args)
+
+
+@nox.session(python=["3.7"])
+def mypy(session):
+    args = session.posargs or locations
+    session.install("mypy")
+    session.run("mypy", *args)
