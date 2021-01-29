@@ -1,5 +1,5 @@
+from datetime import datetime, timedelta
 import os
-from datetime import timedelta, datetime
 
 import numpy as np
 import pandas as pd
@@ -79,11 +79,8 @@ def show_daily_statistics(
         (daily_statistics.index >= min_date) & (daily_statistics.index <= max_date)
     ]
 
-    first_sunday = min_date + timedelta(
-        days=(min_date.day - min_date.weekday() + 7) % 7
-    )
-    last_sunday = max_date - timedelta(days=(max_date.day - max_date.weekday() + 7) % 7)
-    sunday_dates = pd.date_range(start=first_sunday, end=last_sunday, freq="7D")
+    first_sunday = min_date + timedelta(days=(6 - min_date.weekday()))
+    sunday_dates = pd.date_range(start=first_sunday, end=max_date, freq="7D")
 
     # -------- Max time between Feeds
     plt.plot()
