@@ -64,21 +64,60 @@ def compute_daily_statistics(feeding_df: pd.DataFrame) -> pd.DataFrame:
     return result
 
 
-# plt.vlines([date(2020, 11, 30)], ymin=0, ymax=12, colors="grey", linestyles="dotted")
-# , min_date: date=None, max_date: date=None
-
-
 def show_daily_statistics(feeding_df: pd.DataFrame):
     daily_statistics = compute_daily_statistics(feeding_df)
 
+    min_date, max_date = daily_statistics.index.min(), daily_statistics.index.max()
+
+    first_sunday = min_date + timedelta(days=(min_date.day - min_date.weekday() + 7) % 7)
+    last_sunday = max_date - timedelta(days=(max_date.day - max_date.weekday() + 7) % 7)
+    sunday_dates = pd.date_range(start=first_sunday, end=last_sunday, periods=7)
+
+    # -------- Max time between Feeds
     plt.plot()
-    daily_statistics["TimeFromPreviousFeed_max"].plot(style=".-")
+    daily_statistics["TimeFromPreviousFeed_max"].plot(
+        style=".-",
+        figsize=(20, 5),
+        title="Maximum Time between Feeds",
+        ylabel="Hours"
+    )
+    plt.vlines(sunday_dates, ymin=0, ymax=12, colors="grey", linestyles="dotted")
+    plt.hlines(list(range(0, 12, 2)), xmin=min_date, xmax=max_date, colors="grey", linestyles="dotted")
+    plt.show()
+
+    # -------- Number of feeds per day
+    plt.plot()
+    daily_statistics["IsNewFeed_sum"].plot(
+        style=".-",
+        color="lightgreen",
+        figsize=(20, 5),
+        title="Number of feed per day",
+        ylabel="Count",
+        kind="bar"
+    )
+    plt.vlines(sunday_dates, ymin=0, ymax=daily_statistics["IsNewFeed_sum"].max(), colors="grey", linestyles="dotted")
+    plt.hlines([5, 10], xmin=min_date, xmax=max_date, colors="grey", linestyles="dotted")
+    plt.show()
+
+    # -------- Average time between Feeds
+    plt.plot()
+    daily_statistics["TimeFromPreviousFeed_mean"].plot(
+        style=".-",
+        color="orange",
+        figsize=(20, 5),
+        title="Average Time between Feeds",
+        ylabel="Hours"
+    )
+    plt.vlines(sunday_dates, ymin=0, ymax=5, colors="grey", linestyles="dotted")
+    plt.hlines(list(range(5)), xmin=min_date, xmax=max_date, colors="grey", linestyles="dotted")
     plt.show()
 
 
-@click.command()
-def main():
+def run_analysis():
     feeding_df = get_feeding_data()
     feeding_df = prepare_feeding_data(feeding_df)
     show_daily_statistics(feeding_df)
-    return feeding_df
+
+@click.command()
+def main():
+    run_analysis()
