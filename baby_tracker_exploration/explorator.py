@@ -87,7 +87,7 @@ def show_daily_statistics(
     daily_statistics["TimeFromPreviousFeed_max"].plot(
         style=".-",
         figsize=(20, 5),
-        title="Maximum Time between Feeds per Day",
+        title="Max Sleeping Time at Night (Maximum Time between Feeds per Day)",
         ylabel="Hours",
     )
     plt.vlines(sunday_dates, ymin=0, ymax=12, colors="grey", linestyles="dotted")
@@ -98,6 +98,7 @@ def show_daily_statistics(
         colors="grey",
         linestyles="dotted",
     )
+    plt.hlines(5, xmin=min_date, xmax=max_date, colors="red", linestyles="dotted")
     plt.show()
 
     # -------- Number of feeds per day
