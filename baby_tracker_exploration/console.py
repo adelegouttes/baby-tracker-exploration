@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 import os
 
 import click
@@ -64,25 +64,44 @@ def compute_daily_statistics(feeding_df: pd.DataFrame) -> pd.DataFrame:
     return result
 
 
-def show_daily_statistics(feeding_df: pd.DataFrame):
+def show_daily_statistics(
+    feeding_df: pd.DataFrame,
+    min_date_arg: str = None,
+    max_date_arg: str = None,
+):
     daily_statistics = compute_daily_statistics(feeding_df)
 
     min_date, max_date = daily_statistics.index.min(), daily_statistics.index.max()
+    if min_date_arg:
+        min_date = datetime.strptime(min_date_arg, "%Y-%m-%d").date()
+    if max_date_arg:
+        max_date = datetime.strptime(max_date_arg, "%Y-%m-%d").date()
+    daily_statistics = daily_statistics.loc[
+        (daily_statistics.index >= min_date) & (daily_statistics.index <= max_date)
+    ]
 
-    first_sunday = min_date + timedelta(days=(min_date.day - min_date.weekday() + 7) % 7)
+    first_sunday = min_date + timedelta(
+        days=(min_date.day - min_date.weekday() + 7) % 7
+    )
     last_sunday = max_date - timedelta(days=(max_date.day - max_date.weekday() + 7) % 7)
-    sunday_dates = pd.date_range(start=first_sunday, end=last_sunday, periods=7)
+    sunday_dates = pd.date_range(start=first_sunday, end=last_sunday, freq="7D")
 
     # -------- Max time between Feeds
     plt.plot()
     daily_statistics["TimeFromPreviousFeed_max"].plot(
         style=".-",
         figsize=(20, 5),
-        title="Maximum Time between Feeds",
-        ylabel="Hours"
+        title="Maximum Time between Feeds per Day",
+        ylabel="Hours",
     )
     plt.vlines(sunday_dates, ymin=0, ymax=12, colors="grey", linestyles="dotted")
-    plt.hlines(list(range(0, 12, 2)), xmin=min_date, xmax=max_date, colors="grey", linestyles="dotted")
+    plt.hlines(
+        list(range(0, 12, 2)),
+        xmin=min_date,
+        xmax=max_date,
+        colors="grey",
+        linestyles="dotted",
+    )
     plt.show()
 
     # -------- Number of feeds per day
@@ -91,12 +110,20 @@ def show_daily_statistics(feeding_df: pd.DataFrame):
         style=".-",
         color="lightgreen",
         figsize=(20, 5),
-        title="Number of feed per day",
+        title="Number of Feed per Day",
         ylabel="Count",
-        kind="bar"
+        kind="bar",
     )
-    plt.vlines(sunday_dates, ymin=0, ymax=daily_statistics["IsNewFeed_sum"].max(), colors="grey", linestyles="dotted")
-    plt.hlines([5, 10], xmin=min_date, xmax=max_date, colors="grey", linestyles="dotted")
+    plt.vlines(
+        sunday_dates,
+        ymin=0,
+        ymax=daily_statistics["IsNewFeed_sum"].max(),
+        colors="grey",
+        linestyles="dotted",
+    )
+    plt.hlines(
+        [5, 10], xmin=min_date, xmax=max_date, colors="grey", linestyles="dotted"
+    )
     plt.show()
 
     # -------- Average time between Feeds
@@ -105,19 +132,24 @@ def show_daily_statistics(feeding_df: pd.DataFrame):
         style=".-",
         color="orange",
         figsize=(20, 5),
-        title="Average Time between Feeds",
-        ylabel="Hours"
+        title="Average Time between Feeds per Day",
+        ylabel="Hours",
     )
     plt.vlines(sunday_dates, ymin=0, ymax=5, colors="grey", linestyles="dotted")
-    plt.hlines(list(range(5)), xmin=min_date, xmax=max_date, colors="grey", linestyles="dotted")
+    plt.hlines(
+        list(range(5)), xmin=min_date, xmax=max_date, colors="grey", linestyles="dotted"
+    )
     plt.show()
 
 
-def run_analysis():
+def run_analysis(min_date: str = None, max_date: str = None):
     feeding_df = get_feeding_data()
     feeding_df = prepare_feeding_data(feeding_df)
-    show_daily_statistics(feeding_df)
+    show_daily_statistics(feeding_df, min_date_arg=min_date, max_date_arg=max_date)
+
 
 @click.command()
-def main():
-    run_analysis()
+@click.option("--min-date", default=None, type=str, help="Format: YYYY-MM-DD")
+@click.option("--max-date", default=None, type=str, help="Format: YYYY-MM-DD")
+def main(min_date, max_date):
+    run_analysis(min_date=min_date, max_date=max_date)
