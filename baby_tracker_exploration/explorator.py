@@ -1,9 +1,10 @@
 from datetime import datetime, timedelta
 import os
 
+import dateparser
+from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
-from matplotlib import pyplot as plt
 
 DATA_PATH = os.path.join(
     os.path.abspath(os.path.dirname(__file__)), "data/BabyRecords.csv"
@@ -11,7 +12,9 @@ DATA_PATH = os.path.join(
 
 
 def get_feeding_data(data_path: str = DATA_PATH) -> pd.DataFrame:
-    df = pd.read_csv(data_path, parse_dates=["StartDate", "FinishDate"])
+    df = pd.read_csv(
+        data_path, parse_dates=["StartDate", "FinishDate"], date_parser=dateparser.parse
+    )
     feeding_df = df.loc[df["RecordCategory"] == "Feeding"].sort_values(by="StartDate")
 
     start_previous_feed = feeding_df["StartDate"].shift(1)
