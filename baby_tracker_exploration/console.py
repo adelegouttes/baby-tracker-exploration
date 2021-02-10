@@ -6,6 +6,7 @@ ABS_PATH = os.path.join(
     os.path.abspath(os.path.dirname(__file__)), "explorator.ipynb"
 )
 
+
 @click.command()
 def main():
     os.system("ipython kernel install --user --name=baby-tracker-exploration")
