@@ -1,10 +1,9 @@
-import click
+import os
 
-from baby_tracker_exploration.explorator import run_exploration
+import click
 
 
 @click.command()
-@click.option("--min-date", default=None, type=str, help="Format: YYYY-MM-DD")
-@click.option("--max-date", default=None, type=str, help="Format: YYYY-MM-DD")
-def main(min_date, max_date):
-    run_exploration(min_date=min_date, max_date=max_date)
+def main():
+    os.system("ipython kernel install --user --name=baby-tracker-exploration")
+    os.system("jupyter-notebook . --kernel baby-tracker-exploration ")

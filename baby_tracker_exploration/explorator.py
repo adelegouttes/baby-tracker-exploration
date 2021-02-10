@@ -1,10 +1,12 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 import os
 
 import dateparser
-from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+
 
 DATA_PATH = os.path.join(
     os.path.abspath(os.path.dirname(__file__)), "data/BabyRecords.csv"
@@ -66,83 +68,46 @@ def compute_daily_statistics(feeding_df: pd.DataFrame) -> pd.DataFrame:
     return result
 
 
-def show_daily_statistics(
-    feeding_df: pd.DataFrame,
-    min_date_arg: str = None,
-    max_date_arg: str = None,
-):
-    daily_statistics = compute_daily_statistics(feeding_df)
-
-    min_date, max_date = daily_statistics.index.min(), daily_statistics.index.max()
-    if min_date_arg:
-        min_date = datetime.strptime(min_date_arg, "%Y-%m-%d").date()
-    if max_date_arg:
-        max_date = datetime.strptime(max_date_arg, "%Y-%m-%d").date()
-    daily_statistics = daily_statistics.loc[
-        (daily_statistics.index >= min_date) & (daily_statistics.index <= max_date)
-    ]
-
-    first_sunday = min_date + timedelta(days=(6 - min_date.weekday()))
-    sunday_dates = pd.date_range(start=first_sunday, end=max_date, freq="7D")
+def show_daily_statistics(plot_df: pd.DataFrame):
 
     # -------- Max time between Feeds
-    plt.plot()
-    daily_statistics["TimeFromPreviousFeed_max"].plot(
-        style=".-",
-        figsize=(20, 5),
+    fig = px.line(
+        plot_df,
+        x=plot_df.index,
+        y="TimeFromPreviousFeed_max",
         title="Max Sleeping Time at Night (Maximum Time between Feeds per Day)",
-        ylabel="Hours",
+        labels={
+            "TimeFromPreviousFeed_max": "Max Sleeping Time at Night (hour)",
+            "StartDateDay": "Day",
+        },
     )
-    plt.vlines(sunday_dates, ymin=0, ymax=12, colors="grey", linestyles="dotted")
-    plt.hlines(
-        list(range(0, 12, 2)),
-        xmin=min_date,
-        xmax=max_date,
-        colors="grey",
-        linestyles="dotted",
-    )
-    plt.hlines(5, xmin=min_date, xmax=max_date, colors="red", linestyles="dotted")
-    plt.show()
+    fig.show()
 
     # -------- Number of feeds per day
-    plt.plot()
-    daily_statistics["IsNewFeed_sum"].plot(
-        style=".-",
-        color="lightgreen",
-        figsize=(20, 5),
+    fig = go.Figure()
+    fig.add_trace(
+        go.Bar(x=plot_df.index, y=plot_df["IsNewFeed_sum"], marker_color="brown")
+    )
+    fig.update_layout(
         title="Number of Feed per Day",
-        ylabel="Count",
-        kind="bar",
+        xaxis_title="Day",
+        yaxis_title="Count",
     )
-    plt.vlines(
-        sunday_dates,
-        ymin=0,
-        ymax=daily_statistics["IsNewFeed_sum"].max(),
-        colors="grey",
-        linestyles="dotted",
-    )
-    plt.hlines(
-        [5, 10], xmin=min_date, xmax=max_date, colors="grey", linestyles="dotted"
-    )
-    plt.show()
+    fig.show()
 
     # -------- Average time between Feeds
-    plt.plot()
-    daily_statistics["TimeFromPreviousFeed_mean"].plot(
-        style=".-",
-        color="orange",
-        figsize=(20, 5),
+    fig = go.Figure()
+    fig.add_trace(
+        go.Scatter(
+            x=plot_df.index,
+            y=plot_df["TimeFromPreviousFeed_mean"],
+            mode="lines",
+            line=dict(color="green"),
+        )
+    )
+    fig.update_layout(
         title="Average Time between Feeds per Day",
-        ylabel="Hours",
+        xaxis_title="Day",
+        yaxis_title="Hours",
     )
-    plt.vlines(sunday_dates, ymin=0, ymax=5, colors="grey", linestyles="dotted")
-    plt.hlines(
-        list(range(5)), xmin=min_date, xmax=max_date, colors="grey", linestyles="dotted"
-    )
-    plt.show()
-
-
-def run_exploration(min_date: str = None, max_date: str = None):
-    feeding_df = get_feeding_data()
-    feeding_df = prepare_feeding_data(feeding_df)
-    show_daily_statistics(feeding_df, min_date_arg=min_date, max_date_arg=max_date)
+    fig.show()

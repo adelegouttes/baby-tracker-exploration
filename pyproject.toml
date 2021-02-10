@@ -10,6 +10,11 @@ pandas = "^1.0"
 click = "^7.1.2"
 pytest-cov = "^2.11.0"
 dateparser = "^1.0.0"
+jupyter = "^1.0.0"
+ipykernel = "^5.4.3"
+notebook = "^6.2.0"
+ipywidgets = "^7.6.3"
+plotly = "^4.14.3"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.1"
