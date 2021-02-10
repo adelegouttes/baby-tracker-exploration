@@ -13,10 +13,13 @@ DATA_PATH = os.path.join(
 )
 
 
-def get_feeding_data(data_path: str = DATA_PATH) -> pd.DataFrame:
-    df = pd.read_csv(
+def get_baby_tracker_data(data_path: str = DATA_PATH) -> pd.DataFrame:
+    return pd.read_csv(
         data_path, parse_dates=["StartDate", "FinishDate"], date_parser=dateparser.parse
     )
+
+
+def get_feeding_data(df: pd.DataFrame) -> pd.DataFrame:
     feeding_df = df.loc[df["RecordCategory"] == "Feeding"].sort_values(by="StartDate")
 
     start_previous_feed = feeding_df["StartDate"].shift(1)
