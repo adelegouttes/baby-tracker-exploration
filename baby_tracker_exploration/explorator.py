@@ -8,15 +8,23 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 
-DATA_PATH = os.path.join(
-    os.path.abspath(os.path.dirname(__file__)), "data/BabyRecords.csv"
-)
+CURRENT_FOLDER = os.path.abspath(os.path.dirname(__file__))
+DATA_PATH = os.path.join(CURRENT_FOLDER, "data/BabyRecords.csv")
 
 
 def get_baby_tracker_data(data_path: str = DATA_PATH) -> pd.DataFrame:
-    return pd.read_csv(
+    result = pd.read_csv(
         data_path, parse_dates=["StartDate", "FinishDate"], date_parser=dateparser.parse
     )
+    expected_columns = ["RecordCategory", "StartDate", "FinishDate"]
+    if not all(e in result.columns for e in expected_columns):
+        raise ValueError(
+            "Your file contains the following columns: {current_col}"
+            "The CSV must contain at least the following columns: {expected_col} \n"
+            "Check the file example: baby_tracker_exploration/data/ExampleFile.csv"
+            "".format(current_col=result.columns, expected_col=expected_columns)
+        )
+    return result
 
 
 def get_feeding_data(df: pd.DataFrame) -> pd.DataFrame:
@@ -74,7 +82,7 @@ def compute_daily_statistics(feeding_df: pd.DataFrame) -> pd.DataFrame:
 def show_daily_statistics(plot_df: pd.DataFrame):
 
     # -------- Max time between Feeds
-    fig = px.line(
+    fig_1 = px.line(
         plot_df,
         x=plot_df.index,
         y="TimeFromPreviousFeed_max",
@@ -84,23 +92,21 @@ def show_daily_statistics(plot_df: pd.DataFrame):
             "StartDateDay": "Day",
         },
     )
-    fig.show()
 
     # -------- Number of feeds per day
-    fig = go.Figure()
-    fig.add_trace(
+    fig_2 = go.Figure()
+    fig_2.add_trace(
         go.Bar(x=plot_df.index, y=plot_df["IsNewFeed_sum"], marker_color="brown")
     )
-    fig.update_layout(
+    fig_2.update_layout(
         title="Number of Feed per Day",
         xaxis_title="Day",
         yaxis_title="Count",
     )
-    fig.show()
 
     # -------- Average time between Feeds
-    fig = go.Figure()
-    fig.add_trace(
+    fig_3 = go.Figure()
+    fig_3.add_trace(
         go.Scatter(
             x=plot_df.index,
             y=plot_df["TimeFromPreviousFeed_mean"],
@@ -108,9 +114,10 @@ def show_daily_statistics(plot_df: pd.DataFrame):
             line=dict(color="green"),
         )
     )
-    fig.update_layout(
+    fig_3.update_layout(
         title="Average Time between Feeds per Day",
         xaxis_title="Day",
         yaxis_title="Hours",
     )
-    fig.show()
+
+    return fig_1, fig_2, fig_3

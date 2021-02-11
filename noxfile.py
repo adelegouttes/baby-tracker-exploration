@@ -1,14 +1,13 @@
 import nox
 
-
-# Sessions that nox will run by default, if no session is specified
-nox.options.sessions = "lint", "mypy", "tests"
-
-
 # Useful option:
 # `nox -r` reuses the existing venvs, instead of building them from scratch
 # `nox --list`
 # `nox --sessions lint `
+
+
+# Sessions that nox will run by default, if no session is specified
+nox.options.sessions = "lint", "mypy", "tests"
 
 
 @nox.session(python=["3.7"])
