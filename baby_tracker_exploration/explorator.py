@@ -4,9 +4,12 @@ import os
 import dateparser
 import numpy as np
 import pandas as pd
-import plotly.express as px
-import plotly.graph_objects as go
 
+from baby_tracker_exploration.plots.feeding_plots import (
+    plot_avg_time_bet_feeds,
+    plot_max_time_bet_feeds,
+    plot_nb_feeds_per_day,
+)
 
 CURRENT_FOLDER = os.path.abspath(os.path.dirname(__file__))
 DATA_PATH = os.path.join(CURRENT_FOLDER, "data/BabyRecords.csv")
@@ -27,28 +30,25 @@ def get_baby_tracker_data(data_path: str = DATA_PATH) -> pd.DataFrame:
     return result
 
 
-def get_feeding_data(df: pd.DataFrame) -> pd.DataFrame:
+def prepare_feeding_data(df: pd.DataFrame) -> pd.DataFrame:
     feeding_df = df.loc[df["RecordCategory"] == "Feeding"].sort_values(by="StartDate")
 
     start_previous_feed = feeding_df["StartDate"].shift(1)
     time_from_previous_feed = feeding_df["StartDate"] - start_previous_feed
     time_limit = timedelta(minutes=30)
 
-    return feeding_df.assign(
+    feeding_df = feeding_df.assign(
         IsNewFeed=time_from_previous_feed > time_limit,
-        TimeFromPreviousBreast=time_from_previous_feed,
     )
 
+    feeding_df = feeding_df.loc[feeding_df["IsNewFeed"]]
 
-def prepare_feeding_data(feeding_df: pd.DataFrame) -> pd.DataFrame:
-    df = feeding_df.loc[feeding_df["IsNewFeed"]]
+    start_date_day = feeding_df["StartDate"].apply(lambda d: d.date())
+    feed_duration = feeding_df["FinishDate"] - feeding_df["StartDate"]
+    start_previous_feed = feeding_df["StartDate"].shift(1)
+    time_from_previous_feed = feeding_df["StartDate"] - start_previous_feed
 
-    start_date_day = df["StartDate"].apply(lambda d: d.date())
-    feed_duration = df["FinishDate"] - df["StartDate"]
-    start_previous_feed = df["StartDate"].shift(1)
-    time_from_previous_feed = df["StartDate"] - start_previous_feed
-
-    return df.assign(
+    return feeding_df.assign(
         StartDateDay=start_date_day,
         FeedDuration=feed_duration,
         StartPreviousFeed=start_previous_feed,
@@ -81,43 +81,10 @@ def compute_daily_statistics(feeding_df: pd.DataFrame) -> pd.DataFrame:
 
 def show_daily_statistics(plot_df: pd.DataFrame):
 
-    # -------- Max time between Feeds
-    fig_1 = px.line(
-        plot_df,
-        x=plot_df.index,
-        y="TimeFromPreviousFeed_max",
-        title="Max Sleeping Time at Night (Maximum Time between Feeds per Day)",
-        labels={
-            "TimeFromPreviousFeed_max": "Max Sleeping Time at Night (hour)",
-            "StartDateDay": "Day",
-        },
-    )
+    fig_1 = plot_max_time_bet_feeds(plot_df)
 
-    # -------- Number of feeds per day
-    fig_2 = go.Figure()
-    fig_2.add_trace(
-        go.Bar(x=plot_df.index, y=plot_df["IsNewFeed_sum"], marker_color="brown")
-    )
-    fig_2.update_layout(
-        title="Number of Feed per Day",
-        xaxis_title="Day",
-        yaxis_title="Count",
-    )
+    fig_2 = plot_nb_feeds_per_day(plot_df)
 
-    # -------- Average time between Feeds
-    fig_3 = go.Figure()
-    fig_3.add_trace(
-        go.Scatter(
-            x=plot_df.index,
-            y=plot_df["TimeFromPreviousFeed_mean"],
-            mode="lines",
-            line=dict(color="green"),
-        )
-    )
-    fig_3.update_layout(
-        title="Average Time between Feeds per Day",
-        xaxis_title="Day",
-        yaxis_title="Hours",
-    )
+    fig_3 = plot_avg_time_bet_feeds(plot_df)
 
     return fig_1, fig_2, fig_3
