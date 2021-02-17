@@ -79,6 +79,25 @@ def compute_daily_statistics(feeding_df: pd.DataFrame) -> pd.DataFrame:
     return result
 
 
+def compute_summary_statistics(df):
+    nb_good_nights = df.loc[df["TimeFromPreviousFeed_max"] > 5.]["TimeFromPreviousFeed_max"].count()
+    share_of_good_nights = nb_good_nights / len(df)
+    avg_max_sleeping_time = df["TimeFromPreviousFeed_max"].mean()
+    avg_nb_feeds_per_day = df["IsNewFeed_sum"].mean()
+    avg_time_bet_feeds = df["TimeFromPreviousFeed_mean"].mean()
+
+    data = {
+        "Number of good sleeping nights (count)": [nb_good_nights],
+        "Share of good sleeping nights (%)": [share_of_good_nights],
+        "Average time of the longest sleep (hours)": [avg_max_sleeping_time],
+        "Average number of feeds per day (count)": [avg_nb_feeds_per_day],
+        "Average time between feeds (hours)": [avg_time_bet_feeds],
+    }
+    results = pd.DataFrame(data=data.values(), columns=["Value"], index=data.keys())
+
+    return results
+
+
 def show_daily_statistics(plot_df: pd.DataFrame):
 
     fig_1 = plot_max_time_bet_feeds(plot_df)
