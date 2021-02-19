@@ -21,7 +21,9 @@ def get_baby_tracker_data(data_path: str = DATA_PATH) -> pd.DataFrame:
 
     start_date_day = result["StartDate"].apply(lambda d: d.date())
 
-    return result.assign(StartDateDay=start_date_day,)
+    return result.assign(
+        StartDateDay=start_date_day,
+    )
 
 
 def prepare_feeding_data(df: pd.DataFrame) -> pd.DataFrame:
@@ -50,8 +52,7 @@ def prepare_feeding_data(df: pd.DataFrame) -> pd.DataFrame:
 
 def prepare_diapering_data(df, min_date=datetime(2021, 1, 1)):
     result = df.loc[
-        (df["RecordCategory"] == "Diapering")
-        & (df["StartDate"] > min_date)
+        (df["RecordCategory"] == "Diapering") & (df["StartDate"] > min_date)
     ]
     result = result.set_index("StartDate")
     return result

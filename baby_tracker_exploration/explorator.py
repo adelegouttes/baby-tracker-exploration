@@ -39,19 +39,20 @@ def compute_summary_statistics_diapering(df: pd.DataFrame) -> pd.DataFrame:
     summary_data = {
         "Total number of diapers (count)": total_diapers,
         "Savings vs buying disposable diapers (euros)": savings_diapers,
-        "Savings after initial investment (euros)": savings_diapers - initial_investment,
-        "Average number of diapers per day": avg_nb_diapers_per_day
+        "Savings after initial investment (euros)": savings_diapers
+        - initial_investment,
+        "Average number of diapers per day": avg_nb_diapers_per_day,
     }
-    return pd.DataFrame(data=summary_data.values(), columns=["Value"], index=summary_data.keys())
+    return pd.DataFrame(
+        data=summary_data.values(), columns=["Value"], index=summary_data.keys()
+    )
 
 
 def compute_daily_statistics_diapering(df):
     result = df.assign(
         IsNewDiaper=1,
     )
-    result = result.groupby(["StartDateDay"]).agg(
-        {"IsNewDiaper": [np.sum]}
-    )
+    result = result.groupby(["StartDateDay"]).agg({"IsNewDiaper": [np.sum]})
     result.columns = rename_summary_columns(result)
     return result
 
@@ -61,7 +62,9 @@ def rename_summary_columns(df):
 
 
 def compute_summary_statistics_feeding(df):
-    nb_good_nights = df.loc[df["TimeFromPreviousFeed_max"] > 5.]["TimeFromPreviousFeed_max"].count()
+    nb_good_nights = df.loc[df["TimeFromPreviousFeed_max"] > 5.0][
+        "TimeFromPreviousFeed_max"
+    ].count()
     share_of_good_nights = nb_good_nights / len(df)
     avg_max_sleeping_time = df["TimeFromPreviousFeed_max"].mean()
     avg_nb_feeds_per_day = df["IsNewFeed_sum"].mean()

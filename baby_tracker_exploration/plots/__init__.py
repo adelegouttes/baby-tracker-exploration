@@ -1,2 +1,2 @@
-from .widgets import generate_date_widget
 from .feeding_plots import plot_daily_statistics_feeding
+from .widgets import generate_date_widget
