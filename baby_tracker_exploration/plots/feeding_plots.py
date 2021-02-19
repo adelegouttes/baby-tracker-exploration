@@ -1,3 +1,4 @@
+import pandas as pd
 from plotly import express as px, graph_objects as go
 
 
@@ -47,3 +48,14 @@ def plot_max_time_bet_feeds(plot_df):
         },
     )
     return fig_1
+
+
+def plot_daily_statistics_feeding(plot_df: pd.DataFrame):
+
+    fig_1 = plot_max_time_bet_feeds(plot_df)
+
+    fig_2 = plot_nb_feeds_per_day(plot_df)
+
+    fig_3 = plot_avg_time_bet_feeds(plot_df)
+
+    return fig_1, fig_2, fig_3
